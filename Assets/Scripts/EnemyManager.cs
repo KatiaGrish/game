@@ -1,4 +1,4 @@
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
@@ -7,11 +7,22 @@ public class EnemyManager : MonoBehaviour
 
     public void AddEnemy(Enemy enemy)
     {
-        enemyInTrigger.Add(enemy);
+        if (enemy == null) return;
+        
+        if (!enemyInTrigger.Contains(enemy))
+        {
+            enemyInTrigger.Add(enemy);
+        }
     }
 
     public void RemoveEnemy(Enemy enemy)
     {
         enemyInTrigger.Remove(enemy);
+        CleanNullEnemies();
+    }
+
+    public void CleanNullEnemies()
+    {
+        enemyInTrigger.RemoveAll(enemy => enemy == null);
     }
 }

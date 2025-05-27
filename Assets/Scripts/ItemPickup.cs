@@ -9,43 +9,59 @@ public class ItemPickup : MonoBehaviour
     public int amount = 1;
     public Image levelCompleteImage;
 
-    // Статическая переменная для хранения собранных монет
     public static int coinsCollected = 0;
     public const int coinsRequiredToComplete = 5;
 
+    private CanvasManager canvasManager;
+
+    private void Start()
+    {
+        // Находим CanvasManager в сцене
+        canvasManager = FindObjectOfType<CanvasManager>();
+        
+        // Обновляем UI при старте (если монеты уже есть)
+        if (canvasManager != null)
+        {
+            canvasManager.UpdateMoneyText(coinsCollected);
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && isMoney)
         {
-            if (isMoney)
+            // Звук сбора
+            AudioSource audioSource = GetComponent<AudioSource>();
+            if (audioSource != null)
             {
-                // Воспроизводим звук сбора монетки
-                AudioSource audioSource = GetComponent<AudioSource>();
-                if (audioSource != null)
-                {
-                    audioSource.Stop(); // Останавливаем предыдущий звук
-                    audioSource.Play(); // Воспроизводим новый
-                }
-
-                // Увеличиваем счетчик собранных монет
-                coinsCollected += amount;
-                Debug.Log($"Собрано монет: {coinsCollected}/{coinsRequiredToComplete}");
-
-                // Проверяем собраны ли все необходимые монеты
-                if(coinsCollected >= coinsRequiredToComplete)
-                {
-                    CompleteLevel();
-                }
+                audioSource.Play();
             }
 
-            // Отключаем визуальную часть монетки, но оставляем объект для воспроизведения звука
+            // Увеличиваем счётчик
+            coinsCollected += amount;
+
+            // Обновляем текст на UI
+            if (canvasManager != null)
+            {
+                canvasManager.UpdateMoneyText(coinsCollected);
+            }
+
+            Debug.Log($"Монет: {coinsCollected}/{coinsRequiredToComplete}");
+
+            // Проверка победы
+            if (coinsCollected >= coinsRequiredToComplete)
+            {
+                CompleteLevel();
+            }
+
+            // "Скрываем" монету (но оставляем для звука)
             GetComponent<MeshRenderer>().enabled = false;
             GetComponent<Collider>().enabled = false;
 
-            // Уничтожаем объект после завершения звука
-            if (GetComponent<AudioSource>() != null && GetComponent<AudioSource>().isPlaying)
+            // Уничтожаем после звука
+            if (audioSource != null && audioSource.isPlaying)
             {
-                Destroy(gameObject, GetComponent<AudioSource>().clip.length);
+                Destroy(gameObject, audioSource.clip.length);
             }
             else
             {
@@ -56,17 +72,12 @@ public class ItemPickup : MonoBehaviour
 
     void CompleteLevel()
     {
-        Debug.Log("Уровень завершен! Собрано 5 монет!");
-
-        // Показываем изображение финала
-        if(levelCompleteImage != null)
+        if (levelCompleteImage != null)
         {
             levelCompleteImage.gameObject.SetActive(true);
         }
 
-        // Останавливаем время в игре
         Time.timeScale = 0f;
-
         StartCoroutine(LoadNextLevelAfterDelay(3f));
     }
 
@@ -77,7 +88,6 @@ public class ItemPickup : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
-    // Сброс счетчиков при загрузке новой сцены
     public static void ResetCoinCounters()
     {
         coinsCollected = 0;
