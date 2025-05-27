@@ -1,16 +1,32 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using Object = System.Object;
 
-public class EnemyAI : MonoBehaviour
+public class EnemyAI: MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private EnemyAwareness enemyAwareness;
+    private Transform playersTransform;
+    //private NavMeshAgent enemyNavMeshAgent;
+
+    private void Start()
     {
-        
+        enemyAwareness = GetComponent<EnemyAwareness>();
+        playersTransform = FindObjectOfType<PlayerMove>().transform;
+        //enemyNavMeshAgent = GetComponent<NavMeshAgent>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        //if (enemyAwareness.isAggro)
+        //{
+            //enemyNavMeshAgent.SetDestination(playersTransform.position);
+        //}
+        //else
+        //{
+            //enemyNavMeshAgent.SetDestination(transform.position);
+        //}
     }
 }
